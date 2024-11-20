@@ -1,4 +1,6 @@
-package com.sdi.earthquakes;
+package com.sdi;
+
+import java.util.Objects;
 
 public class Earthquake {
 
@@ -6,15 +8,15 @@ public class Earthquake {
     private String place;
     private double magnitude;
     private long time;
-    private double loingitude;
+    private double longitude;
     private double latitude;
 
-    public Earthquake(String id, String place, double magnitude, long time, double loingitude, double latitude) {
+    public Earthquake(String id, String place, double magnitude, long time, double longitude, double latitude) {
         this.id = id;
         this.place = place;
         this.magnitude = magnitude;
         this.time = time;
-        this.loingitude = loingitude;
+        this.longitude = longitude;
         this.latitude = latitude;
     }
 
@@ -50,12 +52,12 @@ public class Earthquake {
         this.time = time;
     }
 
-    public double getLoingitude() {
-        return loingitude;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLoingitude(double loingitude) {
-        this.loingitude = loingitude;
+    public void setLongitude(double loingitude) {
+        this.longitude = loingitude;
     }
 
     public double getLatitude() {
@@ -64,5 +66,18 @@ public class Earthquake {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Earthquake that = (Earthquake) o;
+        return Double.compare(magnitude, that.magnitude) == 0 && time == that.time && Double.compare(longitude, that.longitude) == 0 && Double.compare(latitude, that.latitude) == 0 && Objects.equals(id, that.id) && Objects.equals(place, that.place);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, place, magnitude, time, longitude, latitude);
     }
 }

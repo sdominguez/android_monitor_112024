@@ -3,12 +3,11 @@ package com.sdi.api;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
 
 public class ApiClient {
 
-    public interface Service {
+    public interface EqService {
         @GET("all_hour.geojson")
         Call<EarthquakeJSONResponse> getEarthquakes();
     }
@@ -18,7 +17,7 @@ public class ApiClient {
             .addConverterFactory(MoshiConverterFactory.create())
             .build();
 
-    private Service service;
+    private EqService service;
 
     private static final ApiClient apiClient = new ApiClient();
 
@@ -30,9 +29,9 @@ public class ApiClient {
 
     }
 
-    public Service getService(){
+    public EqService getService(){
         if(service==null){
-            service = retrofit.create(Service.class);
+            service = retrofit.create(EqService.class);
         }
         return service;
     }

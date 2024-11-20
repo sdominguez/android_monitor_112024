@@ -1,6 +1,7 @@
 package com.sdi.api;
 
 import com.squareup.moshi.Json;
+
 public class Properties {
     @Json(name="mag")
     private double magnitude;
