@@ -1,9 +1,14 @@
 package com.sdi.main;
 
+import android.telephony.mbms.DownloadStatusListener;
+
+import androidx.lifecycle.LiveData;
+
 import com.sdi.api.EarthquakeJSONResponse;
 import com.sdi.api.Feature;
 import com.sdi.api.ApiClient;
 import com.sdi.Earthquake;
+import com.sdi.database.EqDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +19,49 @@ import retrofit2.Response;
 
 public class MainRepository {
 
-    public interface DownloadEqsListener{
-        void onEqsDownloaded(List<Earthquake> eqList);
+    private final EqDatabase database;
+
+    public MainRepository(EqDatabase database) {
+        this.database = database;
+    }
+
+    public LiveData<List<Earthquake>> getEqList() {
+        return database.eqDAO().getEarthquakes();
+    }
+
+    public interface DownloadStatusListener{
+        void downloadSuccess();
+        void downloadError(String message);
+    }
+
+
+
+
+
+    public void downloadAndSaveEarthquakes(DownloadStatusListener downloadStatusListener) {
+        ApiClient.EqService service = ApiClient.getInstance().getService();
+
+        service.getEarthquakes().enqueue(new Callback<EarthquakeJSONResponse>() {
+            @Override
+            public void onResponse(Call<EarthquakeJSONResponse> call, Response<EarthquakeJSONResponse> response) {
+                List<Earthquake> earthquakeList = getEarthquakesWithMoshi(response.body());
+
+                EqDatabase.databaseWriteExecutor.execute(() -> {
+                    database.eqDAO().insertAll(earthquakeList);
+                });
+
+                downloadStatusListener.downloadSuccess();
+            }
+
+            @Override
+            public void onFailure(Call<EarthquakeJSONResponse> call, Throwable t) {
+                downloadStatusListener.downloadError(t.getMessage());
+            }
+        });
     }
 
     private List<Earthquake> getEarthquakesWithMoshi(EarthquakeJSONResponse body) {
-        List<Earthquake> eqList = new ArrayList<>();
+        ArrayList<Earthquake> eqList = new ArrayList<>();
 
         List<Feature> features = body.getFeatures();
         for (Feature feature: features) {
@@ -36,19 +78,6 @@ public class MainRepository {
         }
 
         return eqList;
-    }
-
-    public void getEarthquakes(DownloadEqsListener downloadEqsListener){
-        ApiClient.EqService service = ApiClient.getInstance().getService();
-        service.getEarthquakes().enqueue(new Callback<EarthquakeJSONResponse>() {
-            @Override
-            public void onResponse(Call<EarthquakeJSONResponse > call, Response<EarthquakeJSONResponse > response) {
-                List<Earthquake> earthquakeList = getEarthquakesWithMoshi(response.body());
-                downloadEqsListener.onEqsDownloaded(earthquakeList);
-            }
-            @Override
-            public void onFailure(Call<EarthquakeJSONResponse> call, Throwable t) { }
-        });
     }
 
 }
