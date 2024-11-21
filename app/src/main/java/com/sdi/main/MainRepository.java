@@ -34,10 +34,6 @@ public class MainRepository {
         void downloadError(String message);
     }
 
-
-
-
-
     public void downloadAndSaveEarthquakes(DownloadStatusListener downloadStatusListener) {
         ApiClient.EqService service = ApiClient.getInstance().getService();
 
